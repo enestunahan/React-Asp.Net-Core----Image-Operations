@@ -33,11 +33,18 @@ export default function Employee() {
           reader.onload = x => {
               setValues({
                 ...values,
-                imageFile,
+                imageFile: imageFile,
                 imageSrc: x.target.result
               })
           }
           reader.readAsDataURL(imageFile);
+      }
+      else{
+        setValues({
+          ...values,
+          imageFile: null,
+          imageSrc: defaultEmployeeFoto
+        })
       }
   }
 
