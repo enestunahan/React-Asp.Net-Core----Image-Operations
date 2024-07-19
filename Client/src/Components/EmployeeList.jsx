@@ -1,7 +1,30 @@
 import React from 'react'
 import Employee from './Employee'
+import axios from 'axios'
 
 export default function EmployeeList() {
+  
+  
+  const employeeApi = (url = '') => {
+    return {
+      fetchAll: ()=> axios.get(url),
+      create: newRecord => axios.post(url, newRecord),
+      update: (id , updatedRecord) => axios.put(url + id , updatedRecord),
+      delete: id=> axios.delete(url + id)
+    }
+  }
+
+
+
+  const addOrEdit = (formData , onSuccess)=> {
+      employeeApi().create(formData)
+      .then(res => {
+        onSuccess();
+      })
+      .catch(err => console.log(err));
+  }
+
+  
   return (
     <div className='row'>
       
@@ -14,7 +37,8 @@ export default function EmployeeList() {
       </div>
 
       <div className='col-md-4'>
-        <Employee/>
+        <Employee
+         addOrEdit={addOrEdit} />
       </div>
 
       <div className='col-md-8'>

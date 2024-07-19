@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-
 import defaultEmployeeFoto from '../../public/img/defaultEmployee.png'
+
 
 const initialFieldValues = {
   id:0,
@@ -11,10 +11,11 @@ const initialFieldValues = {
   imageFile: null
 }
 
-export default function Employee() {
+export default function Employee(props) {
   
-  const [values , setValues] = useState(initialFieldValues);
+  const {addOrEdit} = props
 
+  const [values , setValues] = useState(initialFieldValues);
   const [errors , setErrors] = useState({});
 
   const handleInputChange = (e) => {
@@ -58,12 +59,26 @@ export default function Employee() {
     return Object.values(temp).every(x=> x === true);
   }
 
+  const resetForm = () => {
+    setValues(initialFieldValues);
+    document.getElementById('image-uploader').value = null;
+    setErrors({});
+  }
 
   const handleFormSubmit = (e) => {
+    
     e.preventDefault();
 
       if(validate()){
-        
+
+        const formData = new FormData();
+
+        formData.append('id' , values.id);
+        formData.append('name', values.name);
+        formData.append('occupation' , values.occupation);
+        formData.append('imageName', values.imageName);
+        formData.append('imageFile', values.imageFile);
+        addOrEdit(formData , resetForm)
       }
 
   }
@@ -88,7 +103,7 @@ export default function Employee() {
               <div className='card-body'>
                   
                   <div className='form-group'>
-                    <input type="file" accept='image/*' className={'form-control-file' + errorApplyClass('imageSrc')} onChange={showPreview} />
+                    <input type="file" accept='image/*' className={'form-control-file' + errorApplyClass('imageSrc')} onChange={showPreview} id='image-uploader' />
                   </div>
 
                   <div className='form-group'>
