@@ -26,6 +26,21 @@ export default function Employee() {
     )
   }
 
+  const showPreview  = (e) => {
+      if(e.target.files && e.target.files[0]){
+          let imageFile = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = x => {
+              setValues({
+                ...values,
+                imageFile,
+                imageSrc: x.target.result
+              })
+          }
+          reader.readAsDataURL(imageFile);
+      }
+  }
+
 
   return (
       <>
@@ -44,7 +59,7 @@ export default function Employee() {
               <div className='card-body'>
                   
                   <div className='form-group'>
-                    <input type="file" accept='image/*' className='form-control-file' />
+                    <input type="file" accept='image/*' className='form-control-file' onChange={showPreview} />
                   </div>
 
                   <div className='form-group'>
