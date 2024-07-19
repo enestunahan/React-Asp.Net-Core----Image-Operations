@@ -10,9 +10,11 @@ namespace API.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly EmployeeDbContext _context;
-        public EmployeeController(EmployeeDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public EmployeeController(EmployeeDbContext context , IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -26,7 +28,7 @@ namespace API.Controllers
         {
             var employee = await _context.Employees.FindAsync(id);
 
-            if(employee == null)
+            if (employee == null)
             {
                 return NotFound();
             }
@@ -35,9 +37,9 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id , Employee employee)
+        public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
-            if(id != employee.Id)
+            if (id != employee.Id)
             {
                 return BadRequest();
             }
@@ -57,7 +59,7 @@ namespace API.Controllers
                 else
                 {
                     throw;
-                }              
+                }
             }
 
             return NoContent();
@@ -66,12 +68,13 @@ namespace API.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee([FromForm] Employee employee)
         {
+            employee.ImageName = await SaveImage(employee.ImageFile);
            _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEmployee", new {id = employee.Id} , employee);
+            return StatusCode(201);
         }
 
         [HttpDelete("{id}")]
@@ -94,7 +97,21 @@ namespace API.Controllers
             return _context.Employees.Any(e => e.Id == id);
         }
 
+        [NonAction]
+        public async Task<string> SaveImage(IFormFile formFile)
+        {
+            string imageName = new String(Path.GetFileNameWithoutExtension(formFile.Name).Take(10).ToArray()).Replace(' ','-');
+            imageName = imageName + DateTime.Now.ToString("yyyyy-MM-dd") + Path.GetExtension(formFile.FileName);
+            
+            var imagePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Images",imageName);
 
+            using(var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await  formFile.CopyToAsync(fileStream);
+            }
+
+            return imageName;
+        }
 
     }
 }

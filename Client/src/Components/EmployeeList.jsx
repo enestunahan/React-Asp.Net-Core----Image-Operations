@@ -5,7 +5,7 @@ import axios from 'axios'
 export default function EmployeeList() {
   
   
-  const employeeApi = (url = '') => {
+  const employeeApi = (url = 'https://localhost:7296/api/Employee/') => {
     return {
       fetchAll: ()=> axios.get(url),
       create: newRecord => axios.post(url, newRecord),
