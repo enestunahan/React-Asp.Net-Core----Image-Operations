@@ -15,6 +15,8 @@ export default function Employee() {
   
   const [values , setValues] = useState(initialFieldValues);
 
+  const [errors , setErrors] = useState({});
+
   const handleInputChange = (e) => {
     
     const {name , value} = e.target;
@@ -48,6 +50,26 @@ export default function Employee() {
       }
   }
 
+  const validate = () =>{
+    let temp = {};
+    temp.name = values.name === '' ? false : true;
+    temp.imageSrc = values.imageSrc === defaultEmployeeFoto ? false : true;
+    setErrors(temp);
+    return Object.values(temp).every(x=> x === true);
+  }
+
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+      if(validate()){
+        
+      }
+
+  }
+
+  const errorApplyClass = field => ((field in errors && errors[field] == false) ? ' invalid-field' : '');
+
 
   return (
       <>
@@ -56,7 +78,7 @@ export default function Employee() {
             <p className='lead'> An Employee </p>
         </div>
 
-        <form autoComplete='off' noValidate>
+        <form autoComplete='off' noValidate onSubmit={handleFormSubmit}>
 
             <div className='card'>
 
@@ -66,12 +88,12 @@ export default function Employee() {
               <div className='card-body'>
                   
                   <div className='form-group'>
-                    <input type="file" accept='image/*' className='form-control-file' onChange={showPreview} />
+                    <input type="file" accept='image/*' className={'form-control-file' + errorApplyClass('imageSrc')} onChange={showPreview} />
                   </div>
 
                   <div className='form-group'>
-                    <input className='form-control' 
-                           placeholder='Employee Name' 
+                    <input className={'form-control' + errorApplyClass('name')}
+                           placeholder='Employee Name'
                            name='name' 
                            value={values.name} 
                            onChange={handleInputChange}
@@ -85,6 +107,10 @@ export default function Employee() {
                            value={values.occupation} 
                            onChange={handleInputChange}
                           />
+                  </div>
+
+                  <div className='form-group text-center'>
+                    <button type='submit' className='btn btn-dark'>Submit</button>
                   </div>
               
               </div>
