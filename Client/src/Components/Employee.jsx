@@ -76,7 +76,7 @@ export default function Employee(props) {
         formData.append('id' , values.id);
         formData.append('name', values.name);
         formData.append('occupation' , values.occupation);
-        formData.append('imageName', values.imageName);
+/*        formData.append('imageName', values.imageName);*/
         formData.append('imageFile', values.imageFile);
         addOrEdit(formData , resetForm)
       }
