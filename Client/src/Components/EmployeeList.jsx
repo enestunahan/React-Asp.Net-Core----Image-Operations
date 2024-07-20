@@ -5,6 +5,7 @@ import axios from 'axios'
 export default function EmployeeList() {
   
   const [employeeList , setEmployeeList] = useState([]);
+  const [recordForEdit , setRecordForEdit] = useState(null);
   
   useEffect(()=> {
     refreshEmployeeList();
@@ -29,18 +30,35 @@ export default function EmployeeList() {
 
 
   const addOrEdit = (formData , onSuccess)=> {
-    debugger;
-      employeeApi().create(formData)
+
+    if(formData.get('id') === "0"){
+        employeeApi().create(formData)
+        .then(res => {
+          onSuccess();
+          refreshEmployeeList();
+        })
+        .catch(err => console.log(err));
+    }
+    else{
+      employeeApi().update(formData.get('id') , formData)
       .then(res => {
         onSuccess();
         refreshEmployeeList();
       })
-      .catch(err => console.log(err));
+      .catch(err => console.log('hata' , err.response.data));
+    }
+
+     
+  }
+
+
+  const showRecordDetails = data => {
+      setRecordForEdit(data);
   }
 
   const imageCard = data => (
 
-      <div className='card'>
+      <div className='card' onClick={()=> showRecordDetails(data)}>
           
           <img src={data.imageSrc} className='card-img-top rounded-circle'/>
           
@@ -67,7 +85,9 @@ export default function EmployeeList() {
 
       <div className='col-md-4'>
         <Employee
-         addOrEdit={addOrEdit} />
+         addOrEdit={addOrEdit} 
+         recordForEdit = {recordForEdit}
+         />
       </div>
 
       <div className='col-md-8'>

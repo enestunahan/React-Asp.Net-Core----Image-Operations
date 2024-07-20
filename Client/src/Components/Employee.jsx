@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import defaultEmployeeFoto from '../../public/img/defaultEmployee.png'
 
 
@@ -13,10 +13,17 @@ const initialFieldValues = {
 
 export default function Employee(props) {
   
-  const {addOrEdit} = props
+  const {addOrEdit , recordForEdit} = props
 
   const [values , setValues] = useState(initialFieldValues);
   const [errors , setErrors] = useState({});
+
+
+  useEffect(()=> {
+    if(recordForEdit != null){
+      setValues(recordForEdit);
+    }
+  },[recordForEdit])
 
   const handleInputChange = (e) => {
     
@@ -70,13 +77,12 @@ export default function Employee(props) {
     e.preventDefault();
 
       if(validate()){
-        debugger;
         const formData = new FormData();
 
         formData.append('id' , values.id);
         formData.append('name', values.name);
         formData.append('occupation' , values.occupation);
-/*        formData.append('imageName', values.imageName);*/
+        formData.append('imageName', values.imageName);
         formData.append('imageFile', values.imageFile);
         addOrEdit(formData , resetForm)
       }

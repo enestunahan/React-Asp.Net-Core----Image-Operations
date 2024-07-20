@@ -11,7 +11,7 @@ namespace API.Controllers
     {
         private readonly EmployeeDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public EmployeeController(EmployeeDbContext context , IWebHostEnvironment webHostEnvironment)
+        public EmployeeController(EmployeeDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
@@ -20,7 +20,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
-            
+
             var data = await _context.Employees
                 .Select(x => new Employee
                 {
@@ -49,11 +49,18 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id, Employee employee)
+        public async Task<IActionResult> PutEmployee(int id, [FromForm] Employee employee)
         {
             if (id != employee.Id)
             {
                 return BadRequest();
+            }
+
+
+            if(employee.ImageFile!= null)
+            {
+                DeleteImage(employee.ImageName);
+                employee.ImageName = await SaveImage(employee.ImageFile);
             }
 
             _context.Entry(employee).State = EntityState.Modified;
@@ -124,6 +131,17 @@ namespace API.Controllers
 
             return imageName;
         }
+
+        [NonAction]
+        public void DeleteImage(string imageName) 
+        {
+            var imagePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Images", imageName);
+            if(System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+        }
+
 
     }
 }
