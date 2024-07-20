@@ -56,6 +56,15 @@ export default function EmployeeList() {
       setRecordForEdit(data);
   }
 
+  const onDelete = (e, id) => {
+    e.stopPropagation();
+    if(window.confirm('Are you sure to delete this record?')){
+      employeeApi().delete(id)
+      .then(res => refreshEmployeeList())
+      .catch(err => console.log(err));
+    }
+  }
+
   const imageCard = data => (
 
       <div className='card' onClick={()=> showRecordDetails(data)}>
@@ -64,7 +73,10 @@ export default function EmployeeList() {
           
           <div className='card-body'>
             <h5>{data.name}</h5>
-            <span> {data.occupation} </span>
+            <span> {data.occupation} </span> <br />
+            <button className='btn btn-light delete-button' onClick={e => onDelete(e,parseInt(data.id)) }>
+                  <i className='far fa-trash-alt'></i>
+            </button>
           </div>
       
       </div>

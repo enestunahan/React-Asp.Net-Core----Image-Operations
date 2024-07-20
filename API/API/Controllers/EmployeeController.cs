@@ -104,7 +104,7 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-
+            DeleteImage(employee.ImageName);
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
 
