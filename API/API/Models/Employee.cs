@@ -17,5 +17,8 @@ namespace API.Models
         
         [NotMapped]
         public IFormFile ImageFile { get; set; }
+
+        [NotMapped]
+        public string? ImageSrc { get; set; }
     }
 }

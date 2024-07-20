@@ -20,7 +20,19 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
-            return await _context.Employees.ToListAsync();
+            
+            var data = await _context.Employees
+                .Select(x => new Employee
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Occupation = x.Occupation,
+                    ImageName = x.ImageName,
+                    ImageSrc = String.Format("{0}://{1}{2}/Images/{3}", Request.Scheme, Request.Host, Request.PathBase, x.ImageName)
+                })
+                .ToListAsync();
+
+            return data;
         }
 
         [HttpGet("{id}")]
@@ -100,7 +112,7 @@ namespace API.Controllers
         [NonAction]
         public async Task<string> SaveImage(IFormFile formFile)
         {
-            string imageName = new String(Path.GetFileNameWithoutExtension(formFile.Name).Take(10).ToArray()).Replace(' ','-');
+            string imageName = new String(Path.GetFileNameWithoutExtension(formFile.FileName).Take(10).ToArray()).Replace(' ','-');
             imageName = imageName + DateTime.Now.ToString("yyyyy-MM-dd") + Path.GetExtension(formFile.FileName);
             
             var imagePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Images",imageName);

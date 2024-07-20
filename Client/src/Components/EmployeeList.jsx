@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Employee from './Employee'
 import axios from 'axios'
 
 export default function EmployeeList() {
   
+  const [employeeList , setEmployeeList] = useState([]);
   
+  useEffect(()=> {
+    refreshEmployeeList();
+  },[]);
+
   const employeeApi = (url = 'https://localhost:7296/api/Employee/') => {
     return {
       fetchAll: ()=> axios.get(url),
@@ -14,15 +19,39 @@ export default function EmployeeList() {
     }
   }
 
+  const refreshEmployeeList = () => {
+    
+    employeeApi().fetchAll()
+                 .then(res => setEmployeeList(res.data))
+                 .catch(err => console.log(err));
+
+  }
 
 
   const addOrEdit = (formData , onSuccess)=> {
+    debugger;
       employeeApi().create(formData)
       .then(res => {
         onSuccess();
+        refreshEmployeeList();
       })
       .catch(err => console.log(err));
   }
+
+  const imageCard = data => (
+
+      <div className='card'>
+          
+          <img src={data.imageSrc} className='card-img-top rounded-circle'/>
+          
+          <div className='card-body'>
+            <h5>{data.name}</h5>
+            <span> {data.occupation} </span>
+          </div>
+      
+      </div>
+
+  )
 
   
   return (
@@ -42,7 +71,21 @@ export default function EmployeeList() {
       </div>
 
       <div className='col-md-8'>
-          <div> list of employee records </div>
+          
+          <table>
+            <tbody>
+              {
+                [...Array(Math.ceil(employeeList.length / 3))].map((e,i)=> 
+                  <tr key={i}>
+                    <td> {imageCard(employeeList[3*i])} </td>
+                    <td> {employeeList[3 * i + 1] ? imageCard(employeeList[3 * i + 1]) : null} </td>
+                    <td> {employeeList[3 * i + 2] ? imageCard(employeeList[3 * i + 2]) : null} </td>
+                  </tr>
+                )
+              }
+            </tbody>
+          </table>
+      
       </div>
       
     </div>

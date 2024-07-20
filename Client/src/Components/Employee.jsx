@@ -70,7 +70,7 @@ export default function Employee(props) {
     e.preventDefault();
 
       if(validate()){
-
+        debugger;
         const formData = new FormData();
 
         formData.append('id' , values.id);
