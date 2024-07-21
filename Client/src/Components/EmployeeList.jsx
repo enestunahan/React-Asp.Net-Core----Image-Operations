@@ -1,69 +1,73 @@
 import React, { useEffect, useState } from 'react'
 import Employee from './Employee'
-import axios from 'axios'
+import employeeService from '../Services/EmployeeService';
+import { Snackbar, Alert } from '@mui/material';
 
 export default function EmployeeList() {
   
   const [employeeList , setEmployeeList] = useState([]);
   const [recordForEdit , setRecordForEdit] = useState(null);
+  const [loading , setLoading] = useState(true);
+  const [error , setError] = useState(null);
+  const [open, setOpen] = useState(false);
   
   useEffect(()=> {
-    refreshEmployeeList();
+     refreshEmployeeList();
   },[]);
 
-  const employeeApi = (url = 'https://localhost:7296/api/Employee/') => {
-    return {
-      fetchAll: ()=> axios.get(url),
-      create: newRecord => axios.post(url, newRecord),
-      update: (id , updatedRecord) => axios.put(url + id , updatedRecord),
-      delete: id=> axios.delete(url + id)
-    }
-  }
 
-  const refreshEmployeeList = () => {
-    
-    employeeApi().fetchAll()
-                 .then(res => setEmployeeList(res.data))
-                 .catch(err => console.log(err));
+  const refreshEmployeeList = async () => {
 
-  }
-
-
-  const addOrEdit = (formData , onSuccess)=> {
-
-    if(formData.get('id') === "0"){
-        employeeApi().create(formData)
-        .then(res => {
-          onSuccess();
-          refreshEmployeeList();
-        })
-        .catch(err => console.log(err));
-    }
-    else{
-      employeeApi().update(formData.get('id') , formData)
-      .then(res => {
-        onSuccess();
-        refreshEmployeeList();
-      })
-      .catch(err => console.log('hata' , err.response.data));
+    setLoading(true);
+    try{
+      const data = await employeeService.getAll();
+      setEmployeeList(data);
+    }catch(err){
+      setError(err.response ? err.response.data : err.message);
+      setOpen(true);
+    }finally{
+      setLoading(false);
     }
 
-     
   }
 
 
-  const showRecordDetails = data => {
-      setRecordForEdit(data);
-  }
+const addOrEdit = async (formData , onSuccess)=> {
 
-  const onDelete = (e, id) => {
+    try{
+      if(formData.get('id') === "0"){
+        await employeeService.create(formData);
+      }else{
+        await employeeService.update(formData.get('id') , formData);
+      }
+      onSuccess();
+      refreshEmployeeList();
+    }catch(err){
+      setError(err.response ? err.response.data : err.message);
+      setOpen(true);
+    }
+
+}
+
+const showRecordDetails = data => {
+    setRecordForEdit(data);
+}
+
+const onDelete = async (e, id) => {
     e.stopPropagation();
+    
     if(window.confirm('Are you sure to delete this record?')){
-      employeeApi().delete(id)
-      .then(res => refreshEmployeeList())
-      .catch(err => console.log(err));
+      
+      try{
+          await employeeService.delete(id);
+          refreshEmployeeList();
+      }catch(err){
+        setError(err.response ? err.response.data : err.message);
+        setOpen(true);
+      }
+    
     }
-  }
+}
 
   const imageCard = data => (
 
@@ -83,42 +87,64 @@ export default function EmployeeList() {
 
   )
 
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
   
   return (
     <div className='row'>
       
-      <div className='col-md-12'>
-        <div className='jumbotron jumbotron-fluid py-4'>
-          <div className='container text-center'>
-            <h1 className='display-4'> Employee Register </h1>
+      {loading ? (
+        <p>Loading ...</p>
+      ): (
+        <>
+          {error && (
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="error">
+              {error}
+            </Alert>
+          </Snackbar>
+          )}
+
+          <div className='col-md-12'>
+                  <div className='jumbotron jumbotron-fluid py-4'>
+                      <div className='container text-center'>
+                        <h1 className='display-4'> Employee Register </h1>
+                      </div>
+                    </div>
           </div>
-        </div>
-      </div>
 
-      <div className='col-md-4'>
-        <Employee
-         addOrEdit={addOrEdit} 
-         recordForEdit = {recordForEdit}
-         />
-      </div>
+          <div className='col-md-4'>
+                    <Employee
+                    addOrEdit={addOrEdit} 
+                    recordForEdit = {recordForEdit}
+                    />
+          </div>
 
-      <div className='col-md-8'>
-          
-          <table>
-            <tbody>
-              {
-                [...Array(Math.ceil(employeeList.length / 3))].map((e,i)=> 
-                  <tr key={i}>
-                    <td> {imageCard(employeeList[3*i])} </td>
-                    <td> {employeeList[3 * i + 1] ? imageCard(employeeList[3 * i + 1]) : null} </td>
-                    <td> {employeeList[3 * i + 2] ? imageCard(employeeList[3 * i + 2]) : null} </td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </table>
-      
-      </div>
+           <div className='col-md-8'>                     
+                      <table>
+                        <tbody>
+                          {
+                            [...Array(Math.ceil(employeeList.length / 3))].map((e,i)=> 
+                              <tr key={i}>
+                                <td> {imageCard(employeeList[3*i])} </td>
+                                <td> {employeeList[3 * i + 1] ? imageCard(employeeList[3 * i + 1]) : null} </td>
+                                <td> {employeeList[3 * i + 2] ? imageCard(employeeList[3 * i + 2]) : null} </td>
+                              </tr>
+                            )
+                          }
+                        </tbody>
+                  </table>                 
+           </div>
+
+        </>
+      )
+    }
+
+    
       
     </div>
   )

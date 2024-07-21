@@ -20,6 +20,10 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
+            // hata durumunu test etmek için 
+            //throw new Exception("Simulated server error");
+            
+            await Task.Delay(500);
 
             var data = await _context.Employees
                 .Select(x => new Employee
@@ -38,6 +42,9 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
+
+
+
             var employee = await _context.Employees.FindAsync(id);
 
             if (employee == null)
